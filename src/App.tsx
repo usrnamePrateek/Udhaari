@@ -4,6 +4,7 @@ import { useSession } from './hooks/useSession';
 import { useRealtime } from './hooks/useRealtime';
 import { supabaseConfigured } from './lib/supabase';
 import { Spinner } from './components/Layout';
+import { UpdateBanner } from './components/Pwa';
 import Login from './screens/Login';
 import Home from './screens/Home';
 import LedgerView from './screens/LedgerView';
@@ -30,6 +31,8 @@ export default function App() {
     );
   }
   return (
+    <>
+    <UpdateBanner />
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
@@ -40,5 +43,6 @@ export default function App() {
       <Route path="/invite/:token" element={<RequireAuth><InviteAccept /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

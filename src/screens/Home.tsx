@@ -6,6 +6,7 @@ import { formatMoney } from '../lib/money';
 import { useBalances, useLedgers } from '../hooks/useData';
 import { useUserId } from '../hooks/useSession';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
+import { InstallCard } from '../components/Pwa';
 
 export default function Home() {
   const uid = useUserId();
@@ -50,6 +51,7 @@ export default function Home() {
         </div>
       ))}
 
+      <InstallCard />
       <ErrorBox error={ledgers.error} />
       {ledgers.isPending ? (
         <Spinner />

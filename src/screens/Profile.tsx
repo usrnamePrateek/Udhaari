@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useSession } from '../hooks/useSession';
 import { ErrorBox, Page } from '../components/Layout';
+import { InstallButton } from '../components/Pwa';
 
 export default function Profile() {
   const { session } = useSession();
@@ -42,7 +43,8 @@ export default function Profile() {
         {msg && <div className="text-sm text-emerald-700">{msg}</div>}
         <ErrorBox error={error} />
       </form>
-      <button className="btn-ghost mt-6 w-full" onClick={() => supabase.auth.signOut()}>Sign out</button>
+      <div className="mt-6"><InstallButton /></div>
+      <button className="btn-ghost mt-3 w-full" onClick={() => supabase.auth.signOut()}>Sign out</button>
     </Page>
   );
 }
