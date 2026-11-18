@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { formatMoney } from '../lib/money';
 import { useEntries, useLedger, useSides } from '../hooks/useData';
+import type { Ledger } from '../lib/types';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
 
 export default function LedgerView() {
@@ -69,7 +71,45 @@ export default function LedgerView() {
           })}
         </ul>
       )}
+
+      <RemovePerson ledgerId={ledger.data.id} name={name} joined={Boolean(other?.user_id)} />
     </Page>
+  );
+}
+
+function RemovePerson({ ledgerId, name, joined }: { ledgerId: string; name: string; joined: boolean }) {
+  const nav = useNavigate();
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  async function remove() {
+    const msg = joined
+      ? `Remove ${name} from your list?\n\n${name} has joined this ledger, so they will keep the full record and history. It will just disappear for you.`
+      : `Remove ${name}?\n\nThis permanently deletes this ledger and all its entries.`;
+    if (!confirm(msg)) return;
+    if (!navigator.onLine) return setError('You are offline. Connect to the internet to remove a person.');
+
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase.rpc('remove_ledger', { p_ledger: ledgerId });
+    setBusy(false);
+    if (error) return setError(error);
+
+    qc.setQueryData<Ledger[]>(['ledgers'], (prev) => prev?.filter((l) => l.id !== ledgerId));
+    qc.removeQueries({ queryKey: ['entries', ledgerId] });
+    qc.invalidateQueries({ queryKey: ['ledgers'] });
+    qc.invalidateQueries({ queryKey: ['balances'] });
+    nav('/', { replace: true });
+  }
+
+  return (
+    <div className="mt-10">
+      <button className="btn-danger w-full" onClick={remove} disabled={busy}>
+        {busy ? 'Removing…' : `Remove ${name}`}
+      </button>
+      <ErrorBox error={error} />
+    </div>
   );
 }
 

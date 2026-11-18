@@ -5,7 +5,7 @@ A shared ledger for money lent and borrowed. It's an installable PWA (Android, i
 ## One-time setup (≈10 min)
 
 1. **Create a Supabase project** at https://supabase.com (free).
-2. **Run the schema**: Dashboard → SQL Editor → paste `supabase/migrations/0001_init.sql` → Run.
+2. **Run the schema**: Dashboard → SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001_…`, `0002_…`). When a new migration is added later, run just that file.
 3. **Auth settings**: Dashboard → Authentication:
    - *URL Configuration*: set **Site URL** to your deployed URL and add `http://localhost:5173/**` plus `https://<your-domain>/**` to **Redirect URLs**.
    - *Providers → Email*: enabled by default (magic link).
