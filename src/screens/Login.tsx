@@ -62,7 +62,7 @@ export default function Login() {
       )}
       <ErrorBox error={error} />
       <div className="mt-2 border-t border-slate-200 pt-6">
-        <InstallButton subtle label="Install Udhaari on this device" />
+        <InstallButton subtle label="Install Udhaari" />
       </div>
       <a href="/privacy.html" className="text-center text-xs text-slate-400 underline">Privacy policy</a>
     </div>
