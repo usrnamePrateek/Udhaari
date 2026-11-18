@@ -53,7 +53,7 @@ export function InstallCard() {
 }
 
 /** Install button: native prompt where supported, instructions sheet on iOS. */
-export function InstallButton({ compact = false }: { compact?: boolean }) {
+export function InstallButton({ compact = false, label, subtle = false }: { compact?: boolean; label?: string; subtle?: boolean }) {
   const inst = useInstall();
   const [showIOS, setShowIOS] = useState(false);
   if (!inst.available) return null;
@@ -61,10 +61,10 @@ export function InstallButton({ compact = false }: { compact?: boolean }) {
   return (
     <>
       <button
-        className={compact ? 'rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white' : 'btn-primary w-full'}
+        className={compact ? 'rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white' : subtle ? 'btn-ghost w-full' : 'btn-primary w-full'}
         onClick={() => (inst.canPrompt ? inst.install() : setShowIOS(true))}
       >
-        Install{compact ? '' : ' app'}
+        {label ?? (compact ? 'Install' : 'Install app')}
       </button>
       {showIOS && <IOSInstructions onClose={() => setShowIOS(false)} />}
     </>

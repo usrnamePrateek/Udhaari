@@ -3,6 +3,7 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useSession } from '../hooks/useSession';
 import { ErrorBox } from '../components/Layout';
+import { InstallButton } from '../components/Pwa';
 
 export default function Login() {
   const { session } = useSession();
@@ -60,6 +61,9 @@ export default function Login() {
         </form>
       )}
       <ErrorBox error={error} />
+      <div className="mt-2 border-t border-slate-200 pt-6">
+        <InstallButton subtle label="Install Udhaari on this device" />
+      </div>
       <a href="/privacy.html" className="text-center text-xs text-slate-400 underline">Privacy policy</a>
     </div>
   );
