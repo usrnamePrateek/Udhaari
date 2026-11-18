@@ -25,7 +25,7 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/index.html',
         // Supabase API calls are cached by TanStack Query in IndexedDB, not by the SW.
-        navigateFallbackDenylist: [/^\/auth/],
+        navigateFallbackDenylist: [/^\/auth/, /^\/privacy/],
       },
     }),
   ],

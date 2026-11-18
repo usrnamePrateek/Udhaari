@@ -60,6 +60,7 @@ export default function Login() {
         </form>
       )}
       <ErrorBox error={error} />
+      <a href="/privacy.html" className="text-center text-xs text-slate-400 underline">Privacy policy</a>
     </div>
   );
 }
