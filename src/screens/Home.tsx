@@ -77,25 +77,25 @@ export default function Home() {
             key={cur}
             className="card mb-4 grid grid-cols-3 overflow-hidden divide-x divide-slate-200"
           >
-            <div className="p-4">
+            <div className="p-3">
               <div className="text-xs uppercase text-slate-500">You'll get</div>
               <div className="text-lg font-bold text-emerald-700">
                 {formatMoney(t.get, cur)}
               </div>
             </div>
-            <div className="p-4">
+            <div className="p-3">
               <div className="text-xs uppercase text-slate-500">You owe</div>
               <div className="text-lg font-bold text-rose-700">
                 {formatMoney(t.owe, cur)}
               </div>
             </div>
-            <div className={`relative min-w-0 p-4 ${bg}`}>
+            <div className={`relative min-w-0 p-3 ${bg}`}>
               {/* absolute so a big emoji can't change the cell's height */}
-              <span className="absolute right-6 top-3 text-2xl leading-none">
+              <span className="absolute right-2 top-3 text-xl leading-none">
                 {emoji}
               </span>
               <div
-                className={`truncate pr-10 text-xs font-semibold uppercase ${color}`}
+                className={`truncate pr-5 text-xs uppercase ${color}`}
               >
                 {label}
               </div>
