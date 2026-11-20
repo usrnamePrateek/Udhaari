@@ -89,18 +89,19 @@ export default function Home() {
                 {formatMoney(t.owe, cur)}
               </div>
             </div>
-            <div
-              className={`flex items-center justify-between gap-2 p-3 ${bg}`}
-            >
-              <div className="min-w-0">
-                <div className={`text-xs font-semibold uppercase ${color}`}>
-                  {label}
-                </div>
-                <div className={`text-lg font-bold ${color}`}>
-                  {formatMoney(Math.abs(net), cur)}
-                </div>
+            <div className={`relative min-w-0 p-3 ${bg}`}>
+              {/* absolute so a big emoji can't change the cell's height */}
+              <span className="absolute right-6 top-2 text-2xl leading-none">
+                {emoji}
+              </span>
+              <div
+                className={`truncate pr-10 text-xs font-semibold uppercase ${color}`}
+              >
+                {label}
               </div>
-              <span className="mr-3 text-3xl leading-none">{emoji}</span>
+              <div className={`text-lg font-bold ${color}`}>
+                {formatMoney(Math.abs(net), cur)}
+              </div>
             </div>
           </div>
         );
