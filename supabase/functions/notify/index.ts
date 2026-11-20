@@ -4,8 +4,8 @@
 // Secrets (npx supabase secrets set …): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:…)
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
-import { createClient } from 'npm:@supabase/supabase-js@2';
-import webpush from 'npm:web-push@3.6.7';
+import { createClient } from '@supabase/supabase-js';
+import webpush from 'web-push';
 import { buildMessage, type EntrySnapshot, type MessageInput } from './message.ts';
 
 type HistoryRow = {
