@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { SAVE_ENTRY } from '../lib/queryClient';
 import { formatMoney, paiseToInput, parseToPaise, today } from '../lib/money';
+import { canEditEntry } from '../lib/ledger';
 import type { Entry, EntryInput, HistoryRow, Member } from '../lib/types';
 import { useEntries, useHistory, useLedger, useSides } from '../hooks/useData';
 import { ErrorBox, Page, Spinner } from '../components/Layout';
@@ -19,21 +20,11 @@ export default function EntryForm() {
   if (entryId && !existing) return <Page title="Not found" back={`/l/${id}`}><ErrorBox error="This entry was deleted." /></Page>;
 
   const members = ledger.data.ledger_members;
-  if (existing && !canEdit(existing, me, members)) {
+  if (existing && !canEditEntry(existing, me, members)) {
     return <ReadOnly ledgerId={ledger.data.id} currency={ledger.data.currency} me={me} entry={existing} members={members} />;
   }
 
   return <Form key={existing?.id ?? 'new'} ledgerId={ledger.data.id} currency={ledger.data.currency} me={me} other={other} existing={existing} members={members} />;
-}
-
-/**
- * Mirrors the database rule (migration 0003): only whoever added an entry may change it,
- * unless they no longer have access to the ledger. Null created_by = account gone, or a
- * freshly added offline entry that hasn't synced yet.
- */
-function canEdit(entry: Entry, me: Member, members: Member[]): boolean {
-  if (!entry.created_by || entry.created_by === me.user_id) return true;
-  return !members.some((m) => m.user_id === entry.created_by);
 }
 
 function ReadOnly({ ledgerId, currency, me, entry, members }: {

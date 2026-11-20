@@ -18,6 +18,8 @@ A shared ledger for money lent and borrowed. It's an installable PWA (Android, i
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
+npm test           # unit tests (Vitest)
+npm run test:watch # re-run tests on file changes
 ```
 
 ## Deploy (free)

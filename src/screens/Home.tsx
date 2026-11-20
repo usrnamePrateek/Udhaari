@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { formatMoney } from '../lib/money';
+import { totalsByCurrency } from '../lib/ledger';
 import { useBalances, useLedgers } from '../hooks/useData';
 import { useUserId } from '../hooks/useSession';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
@@ -20,14 +21,7 @@ export default function Home() {
     return { l, me, other, net: me ? balances.data?.[me.id] ?? 0 : 0 };
   });
 
-  // Totals per currency
-  const totals = new Map<string, { get: number; owe: number }>();
-  for (const r of rows) {
-    const t = totals.get(r.l.currency) ?? { get: 0, owe: 0 };
-    if (r.net > 0) t.get += r.net;
-    else t.owe -= r.net;
-    totals.set(r.l.currency, t);
-  }
+  const totals = totalsByCurrency(rows.map((r) => ({ currency: r.l.currency, net: r.net })));
 
   return (
     <Page

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { formatMoney } from '../lib/money';
 import { useEntries, useLedger, useSides } from '../hooks/useData';
 import type { Ledger } from '../lib/types';
+import { netBalance, runningBalances } from '../lib/ledger';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
 
 export default function LedgerView() {
@@ -18,16 +19,10 @@ export default function LedgerView() {
 
   const cur = ledger.data.currency;
   const list = entries.data ?? [];
-  const net = list.reduce((s, e) => s + (e.from_member === me.id ? e.amount_paise : e.to_member === me.id ? -e.amount_paise : 0), 0);
+  const net = netBalance(list, me.id);
   const name = other?.display_name ?? ledger.data.name;
 
-  // Running balance (oldest → newest), shown next to each row.
-  const running = new Map<string, number>();
-  [...list].reverse().reduce((acc, e) => {
-    const v = acc + (e.from_member === me.id ? e.amount_paise : -e.amount_paise);
-    running.set(e.id, v);
-    return v;
-  }, 0);
+  const running = runningBalances(list, me.id);
 
   return (
     <Page title={name} back="/">

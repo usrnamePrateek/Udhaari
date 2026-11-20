@@ -13,13 +13,20 @@ export function paiseToInput(paise: number): string {
 }
 
 const fmtCache = new Map<string, Intl.NumberFormat>();
-export function formatMoney(paise: number, currency = 'INR'): string {
-  let f = fmtCache.get(currency);
+function formatter(currency: string, decimals: 0 | 2): Intl.NumberFormat {
+  const key = `${currency}:${decimals}`;
+  let f = fmtCache.get(key);
   if (!f) {
-    f = new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 2, minimumFractionDigits: 0 });
-    fmtCache.set(currency, f);
+    f = new Intl.NumberFormat('en-IN', { style: 'currency', currency, minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    fmtCache.set(key, f);
   }
-  return f.format(Math.abs(paise) / 100);
+  return f;
+}
+
+/** Absolute amount for display: "₹500" for whole rupees, "₹1,234.50" otherwise (Indian digit grouping). */
+export function formatMoney(paise: number, currency = 'INR'): string {
+  const abs = Math.abs(paise);
+  return formatter(currency, abs % 100 === 0 ? 0 : 2).format(abs / 100);
 }
 
 export function today(): string {
