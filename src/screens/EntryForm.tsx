@@ -97,16 +97,16 @@ function Form({ ledgerId, currency, me, other, existing, members }: {
           </button>
         </div>
 
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 flex-col gap-1">
           <span className="text-sm font-medium">Amount ({currency})</span>
           <input className="input text-2xl font-bold" inputMode="decimal" autoFocus={!existing} required placeholder="0"
             value={amount} onChange={(e) => setAmount(e.target.value)} />
         </label>
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 flex-col gap-1">
           <span className="text-sm font-medium">Date</span>
           <input className="input" type="date" required value={date} max={today()} onChange={(e) => setDate(e.target.value)} />
         </label>
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 flex-col gap-1">
           <span className="text-sm font-medium">Note</span>
           <input className="input" placeholder="e.g. Dinner, rent, cab" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
         </label>

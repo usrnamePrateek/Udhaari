@@ -11,4 +11,23 @@
   .card { @apply rounded-2xl bg-white ring-1 ring-slate-200; }
 }
 
+/* Never allow sideways scrolling on phones. `clip` (unlike `hidden`) keeps the sticky header working. */
+html, body { overflow-x: clip; }
 body { padding-bottom: env(safe-area-inset-bottom); }
+
+/* iOS Safari gives date/time inputs an intrinsic min-width and centred text, so they overflow
+   their container and ignore width: 100%. Reset that so they behave like normal inputs. */
+input[type='date'],
+input[type='time'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 3.125rem; /* same height as other inputs when the value is empty */
+}
+input[type='date']::-webkit-date-and-time-value,
+input[type='time']::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
