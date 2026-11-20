@@ -18,7 +18,46 @@ export default function EntryForm() {
   if (!ledger.data || !me || !other) return <Page title="Not found" back="/"><ErrorBox error="Ledger not found." /></Page>;
   if (entryId && !existing) return <Page title="Not found" back={`/l/${id}`}><ErrorBox error="This entry was deleted." /></Page>;
 
-  return <Form key={existing?.id ?? 'new'} ledgerId={ledger.data.id} currency={ledger.data.currency} me={me} other={other} existing={existing} members={ledger.data.ledger_members} />;
+  const members = ledger.data.ledger_members;
+  if (existing && !canEdit(existing, me, members)) {
+    return <ReadOnly ledgerId={ledger.data.id} currency={ledger.data.currency} me={me} entry={existing} members={members} />;
+  }
+
+  return <Form key={existing?.id ?? 'new'} ledgerId={ledger.data.id} currency={ledger.data.currency} me={me} other={other} existing={existing} members={members} />;
+}
+
+/**
+ * Mirrors the database rule (migration 0003): only whoever added an entry may change it,
+ * unless they no longer have access to the ledger. Null created_by = account gone, or a
+ * freshly added offline entry that hasn't synced yet.
+ */
+function canEdit(entry: Entry, me: Member, members: Member[]): boolean {
+  if (!entry.created_by || entry.created_by === me.user_id) return true;
+  return !members.some((m) => m.user_id === entry.created_by);
+}
+
+function ReadOnly({ ledgerId, currency, me, entry, members }: {
+  ledgerId: string; currency: string; me: Member; entry: Entry; members: Member[];
+}) {
+  const name = (memberId: string) => (memberId === me.id ? 'You' : members.find((m) => m.id === memberId)?.display_name ?? '?');
+  const owner = members.find((m) => m.user_id === entry.created_by)?.display_name ?? 'the other person';
+  const gave = entry.from_member === me.id;
+  return (
+    <Page title="Entry" back={`/l/${ledgerId}`}>
+      <div className="card p-5">
+        <div className="text-sm text-slate-500">{name(entry.from_member)} gave {name(entry.to_member) === 'You' ? 'you' : name(entry.to_member)}</div>
+        <div className={`mt-1 text-3xl font-bold ${gave ? 'text-rose-700' : 'text-emerald-700'}`}>{formatMoney(entry.amount_paise, currency)}</div>
+        <div className="mt-3 text-sm text-slate-600">
+          {new Date(entry.occurred_on + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </div>
+        {entry.note && <div className="mt-1 text-slate-800">{entry.note}</div>}
+      </div>
+      <div className="mt-4 rounded-xl bg-slate-100 p-3 text-sm text-slate-600">
+        Added by <b>{owner}</b>. Only they can edit or delete it.
+      </div>
+      <History entryId={entry.id} members={members} me={me} currency={currency} />
+    </Page>
+  );
 }
 
 function Form({ ledgerId, currency, me, other, existing, members }: {

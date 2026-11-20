@@ -35,6 +35,7 @@ To install it on a phone, open the site, then use Chrome's "Install app" or Safa
 - **Ledger** = you plus one other person. The other person starts as a placeholder, so you can track someone who isn't on the app.
 - **Invite**: on a ledger, tap *Invite*. A 7-day link is shared through WhatsApp or the share sheet. When they accept, they take over the placeholder.
 - **Entries** are "X gave Y ₹N" and are stored in paise. Deletes are soft deletes and can be restored in SQL.
+- **Ownership**: only the person who added an entry can edit or delete it, and the other person can view it. The exception is when the person who added it has left the ledger. This rule is enforced in the database.
 - **History**: a database trigger records every create, edit, delete and restore, with who made it and the before/after values. It's shown on each entry's edit screen.
 - **Security**: Postgres Row Level Security means only ledger members can read or write a ledger. The history table can't be written from the client.
 - **Offline**: the service worker caches the app shell. Query data is saved in IndexedDB. Entries added while offline are queued and synced when you're back online, including after an app restart.

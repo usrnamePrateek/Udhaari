@@ -59,6 +59,9 @@ export default function LedgerView() {
                     <div className="text-xs text-slate-500">
                       {new Date(e.occurred_on + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       {' · '}bal {run === 0 ? 'settled' : `${run > 0 ? '+' : '−'}${formatMoney(run, cur)}`}
+                      {e.created_by && e.created_by !== me.user_id && (
+                        <> · added by {ledger.data!.ledger_members.find((m) => m.user_id === e.created_by)?.display_name ?? 'them'}</>
+                      )}
                     </div>
                   </div>
                   <div className={`text-right font-bold ${gave ? 'text-rose-700' : 'text-emerald-700'}`}>
