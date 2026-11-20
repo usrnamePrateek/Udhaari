@@ -89,9 +89,9 @@ export default function Home() {
                 {formatMoney(t.owe, cur)}
               </div>
             </div>
-            <div className={`relative min-w-0 p-3 ${bg}`}>
+            <div className={`relative min-w-0 p-4 ${bg}`}>
               {/* absolute so a big emoji can't change the cell's height */}
-              <span className="absolute right-6 top-2 text-2xl leading-none">
+              <span className="absolute right-6 top-3 text-2xl leading-none">
                 {emoji}
               </span>
               <div
