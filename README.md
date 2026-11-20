@@ -12,12 +12,38 @@ A shared ledger for money lent and borrowed. It's an installable PWA (Android, i
    - *Providers → Google* (optional): create an OAuth client in Google Cloud Console with redirect URI `https://<project>.supabase.co/auth/v1/callback`, then paste the client ID and secret here.
 4. **Env**: `cp .env.example .env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Dashboard → Project Settings → API).
 
+## Notifications setup (optional)
+
+When the other person adds, edits or deletes an entry, you get a push notification. This works on Android and desktop. On iPhone it needs iOS 16.4+ with the app added to the home screen.
+
+1. **Generate keys** (once):
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+   Put the **public** key in `.env` as `VITE_VAPID_PUBLIC_KEY`, and add the same variable in Vercel.
+2. **Database**: run `supabase/migrations/0004_push_notifications.sql` in the SQL Editor.
+3. **Deploy the function** and its secrets:
+   ```bash
+   npx supabase login
+   npx supabase functions deploy notify --project-ref <project-ref>
+   npx supabase secrets set --project-ref <project-ref> \
+     VAPID_PUBLIC_KEY=<public> VAPID_PRIVATE_KEY=<private> VAPID_SUBJECT=mailto:<your-email>
+   ```
+4. **Webhook**: in Supabase, go to Database → Webhooks → Create a new hook:
+   - Table `entry_history`, events: **Insert**
+   - Type: **Supabase Edge Functions**, then pick `notify`, method POST
+   - Click **Add auth header with service key**, then create it
+5. Redeploy the app. On each phone, go to **Profile → Turn on notifications**.
+
+To debug, check Supabase → Edge Functions → `notify` → Logs. Each change logs how many notifications were sent, expired or failed.
+
 ## Run
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # production build in dist/
+npm run build      # production build in dist/ (service worker is only active in builds:
+                   # use `npm run build && npm run preview` to test offline/notifications)
 npm test           # unit tests (Vitest)
 npm run test:watch # re-run tests on file changes
 ```

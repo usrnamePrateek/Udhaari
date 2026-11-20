@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import type { ReactNode } from 'react';
-import { useSession } from './hooks/useSession';
+import { useEffect, type ReactNode } from 'react';
+import { useSession, useUserId } from './hooks/useSession';
 import { useRealtime } from './hooks/useRealtime';
 import { supabaseConfigured } from './lib/supabase';
 import { Spinner } from './components/Layout';
 import { UpdateBanner } from './components/Pwa';
+import { syncPushSubscription } from './lib/push';
 import Login from './screens/Login';
 import Home from './screens/Home';
 import LedgerView from './screens/LedgerView';
@@ -22,6 +23,10 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 export default function App() {
   useRealtime();
+  const uid = useUserId();
+  useEffect(() => {
+    if (uid) syncPushSubscription().catch(() => {});
+  }, [uid]);
   if (!supabaseConfigured) {
     return (
       <div className="mx-auto max-w-md p-6 text-sm">

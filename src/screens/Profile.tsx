@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { useSession } from '../hooks/useSession';
 import { ErrorBox, Page } from '../components/Layout';
 import { InstallButton } from '../components/Pwa';
+import { NotificationsToggle } from '../components/Notifications';
+import { disablePush } from '../lib/push';
 
 export default function Profile() {
   const { session } = useSession();
@@ -17,6 +19,12 @@ export default function Profile() {
     supabase.from('profiles').select('display_name').eq('id', uid).single()
       .then(({ data }) => data && setName(data.display_name));
   }, [uid]);
+
+  async function signOut() {
+    // Stop this device getting the account's notifications once signed out.
+    await disablePush().catch(() => {});
+    await supabase.auth.signOut();
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -43,8 +51,9 @@ export default function Profile() {
         {msg && <div className="text-sm text-emerald-700">{msg}</div>}
         <ErrorBox error={error} />
       </form>
+      <NotificationsToggle />
       <div className="mt-6"><InstallButton /></div>
-      <button className="btn-ghost mt-3 w-full" onClick={() => supabase.auth.signOut()}>Sign out</button>
+      <button className="btn-ghost mt-3 w-full" onClick={signOut}>Sign out</button>
     </Page>
   );
 }

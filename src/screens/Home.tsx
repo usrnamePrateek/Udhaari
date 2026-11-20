@@ -8,6 +8,7 @@ import { useBalances, useLedgers } from '../hooks/useData';
 import { useUserId } from '../hooks/useSession';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
 import { InstallCard } from '../components/Pwa';
+import { NotificationsCard } from '../components/Notifications';
 
 export default function Home() {
   const uid = useUserId();
@@ -46,6 +47,7 @@ export default function Home() {
       ))}
 
       <InstallCard />
+      {rows.some((r) => r.other?.user_id) && <NotificationsCard />}
       <ErrorBox error={ledgers.error} />
       {ledgers.isPending ? (
         <Spinner />

@@ -7,6 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
+      // Custom service worker (src/sw.ts) so we can handle push notifications.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Udhaari',
@@ -22,10 +26,8 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
-        navigateFallback: '/index.html',
-        // Supabase API calls are cached by TanStack Query in IndexedDB, not by the SW.
-        navigateFallbackDenylist: [/^\/auth/, /^\/privacy/],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
       },
     }),
   ],

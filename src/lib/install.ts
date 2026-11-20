@@ -22,7 +22,7 @@ window.addEventListener('appinstalled', () => {
   emit();
 });
 
-const standalone = () =>
+export const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
   (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
@@ -31,9 +31,9 @@ const ua = navigator.userAgent;
 export const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 
 type State = { canPrompt: boolean; isInstalled: boolean };
-let snapshot: State = { canPrompt: false, isInstalled: standalone() };
+let snapshot: State = { canPrompt: false, isInstalled: isStandalone() };
 function getSnapshot(): State {
-  const next = { canPrompt: deferred !== null, isInstalled: installed || standalone() };
+  const next = { canPrompt: deferred !== null, isInstalled: installed || isStandalone() };
   if (next.canPrompt !== snapshot.canPrompt || next.isInstalled !== snapshot.isInstalled) snapshot = next;
   return snapshot;
 }
@@ -64,17 +64,18 @@ export function useInstall() {
 }
 
 const DISMISS_KEY = 'udhaari-install-dismissed';
-export function wasDismissed(): boolean {
+/** Was this prompt dismissed in the last 2 weeks? `key` lets other prompts reuse this. */
+export function wasDismissed(key = DISMISS_KEY): boolean {
   try {
-    const t = Number(localStorage.getItem(DISMISS_KEY) || 0);
+    const t = Number(localStorage.getItem(key) || 0);
     return Date.now() - t < 1000 * 60 * 60 * 24 * 14; // hide for 2 weeks
   } catch {
     return false;
   }
 }
-export function dismiss() {
+export function dismiss(key = DISMISS_KEY) {
   try {
-    localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    localStorage.setItem(key, String(Date.now()));
   } catch {
     /* storage unavailable: fine, it'll just show again */
   }
