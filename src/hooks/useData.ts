@@ -34,6 +34,20 @@ export function useBalances() {
   });
 }
 
+/** Map ledger_id → latest entry updated_at. Key under 'balances' so existing invalidations refresh it. */
+export function useLastActivity() {
+  return useQuery({
+    queryKey: ['balances', 'activity'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('entries').select('ledger_id, updated_at');
+      if (error) throw error;
+      const last: Record<string, string> = {};
+      for (const r of data) if (!last[r.ledger_id] || r.updated_at > last[r.ledger_id]) last[r.ledger_id] = r.updated_at;
+      return last;
+    },
+  });
+}
+
 export function useEntries(ledgerId: string | undefined) {
   return useQuery({
     queryKey: ['entries', ledgerId],

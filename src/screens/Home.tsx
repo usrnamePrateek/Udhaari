@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { formatMoney } from "../lib/money";
 import { totalsByCurrency } from "../lib/ledger";
-import { useBalances, useLedgers } from "../hooks/useData";
+import { useBalances, useLastActivity, useLedgers } from "../hooks/useData";
 import { useUserId } from "../hooks/useSession";
 import { Balance, ErrorBox, Page, Spinner } from "../components/Layout";
 import { InstallCard } from "../components/Pwa";
@@ -14,6 +14,7 @@ export default function Home() {
   const uid = useUserId();
   const ledgers = useLedgers();
   const balances = useBalances();
+  const activity = useLastActivity();
   const [adding, setAdding] = useState(false);
 
   const rows = (ledgers.data ?? []).map((l) => {
@@ -21,6 +22,8 @@ export default function Home() {
     const other = l.ledger_members.find((m) => m.id !== me?.id);
     return { l, me, other, net: me ? (balances.data?.[me.id] ?? 0) : 0 };
   });
+  const last = (id: string, created: string) => activity.data?.[id] ?? created;
+  rows.sort((a, b) => last(b.l.id, b.l.created_at).localeCompare(last(a.l.id, a.l.created_at)));
 
   const totals = totalsByCurrency(
     rows.map((r) => ({ currency: r.l.currency, net: r.net })),
