@@ -43,11 +43,16 @@ export default function LedgerView() {
         <p className="py-8 text-center text-slate-500">No entries yet.</p>
       ) : (
         <ul className="card divide-y divide-slate-100">
-          {list.map((e) => {
+          {list.map((e, i) => {
             const gave = e.from_member === me.id;
             const run = running.get(e.id) ?? 0;
             return (
               <li key={e.id}>
+                {run === 0 && i > 0 && (
+                  <div className="flex items-center gap-2 px-4 py-1 text-[10px] font-semibold uppercase text-slate-500">
+                    <span className="h-px flex-1 bg-slate-800" />✓ Settled<span className="h-px flex-1 bg-slate-800" />
+                  </div>
+                )}
                 <Link to={`/l/${id}/e/${e.id}`} className="flex items-center gap-3 p-4 hover:bg-slate-50">
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{e.note || (gave ? `You gave ${name}` : `${name} gave you`)}</div>
