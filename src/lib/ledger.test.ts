@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canEditEntry, entryDelta, netBalance, runningBalances, totalsByCurrency } from './ledger';
+import { canEditEntry, entryDelta, netBalance, runningBalances, settledGroupStarts, totalsByCurrency } from './ledger';
 import type { Entry } from './types';
 
 const ME = 'm-me';
@@ -69,6 +69,23 @@ describe('runningBalances', () => {
   });
   it('is empty for no entries', () => {
     expect(runningBalances([], ME).size).toBe(0);
+  });
+});
+
+describe('settledGroupStarts', () => {
+  const starts = (list: Entry[]) => settledGroupStarts(list, runningBalances(list, ME));
+  it('puts entries after the last settlement in the open cycle (-1)', () => {
+    // oldest → newest: +5, −5 (settles), +3
+    const list = [entry(ME, THEM, 3), entry(THEM, ME, 5), entry(ME, THEM, 5)];
+    expect(starts(list)).toEqual([-1, 1, 1]);
+  });
+  it('starts a new group at each older settlement', () => {
+    // oldest → newest: +5, −5 (settles), +2, −2 (settles)
+    const list = [entry(THEM, ME, 2), entry(ME, THEM, 2), entry(THEM, ME, 5), entry(ME, THEM, 5)];
+    expect(starts(list)).toEqual([0, 0, 2, 2]);
+  });
+  it('is empty for no entries', () => {
+    expect(starts([])).toEqual([]);
   });
 });
 

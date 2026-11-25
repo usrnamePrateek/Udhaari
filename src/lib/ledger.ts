@@ -26,6 +26,18 @@ export function runningBalances(entries: Entry[], meId: string): Map<string, num
   return out;
 }
 
+/**
+ * For a newest-first list: per index, the index of the entry that settled its group
+ * (balance 0), running down to the next older zero. -1 = newer than the last settlement.
+ */
+export function settledGroupStarts(entries: Entry[], running: Map<string, number>): number[] {
+  let g = -1;
+  return entries.map((e, i) => {
+    if (running.get(e.id) === 0) g = i;
+    return g;
+  });
+}
+
 /** Sum of what I'll get and what I owe, per currency, from per-ledger nets. */
 export function totalsByCurrency(items: { currency: string; net: number }[]): Map<string, { get: number; owe: number }> {
   const totals = new Map<string, { get: number; owe: number }>();

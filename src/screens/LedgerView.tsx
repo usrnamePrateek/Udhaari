@@ -5,8 +5,11 @@ import { supabase } from '../lib/supabase';
 import { formatMoney } from '../lib/money';
 import { useEntries, useLedger, useSides } from '../hooks/useData';
 import type { Ledger } from '../lib/types';
-import { netBalance, runningBalances } from '../lib/ledger';
+import { netBalance, runningBalances, settledGroupStarts } from '../lib/ledger';
 import { Balance, ErrorBox, Page, Spinner } from '../components/Layout';
+
+const fmtDate = (ymd: string) =>
+  new Date(ymd + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function LedgerView() {
   const { id } = useParams();
@@ -26,12 +29,7 @@ export default function LedgerView() {
   const running = runningBalances(list, me.id);
 
   // Newest-first: a balance of 0 starts a settled group that runs down to the next older zero. -1 = open cycle.
-  const groupStart: number[] = [];
-  let g = -1;
-  list.forEach((e, i) => {
-    if (running.get(e.id) === 0) g = i;
-    groupStart.push(g);
-  });
+  const groupStart = settledGroupStarts(list, running);
   const toggle = (eid: string) =>
     setExpanded((s) => {
       const n = new Set(s);
@@ -70,18 +68,19 @@ export default function LedgerView() {
                   <button
                     type="button"
                     onClick={() => toggle(e.id)}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-[10px] font-semibold uppercase text-slate-500 hover:bg-slate-50"
+                    aria-expanded={open}
+                    className="flex w-full items-center gap-3 bg-slate-50 px-4 py-2.5 text-[11px] font-medium text-slate-500 hover:bg-slate-100"
                   >
-                    <span className="h-px flex-1 bg-slate-800" />
-                    ✓ Settled {new Date(e.occurred_on + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} {open ? '▾' : '▸'}
-                    <span className="h-px flex-1 bg-slate-800" />
+                    <span className="h-px flex-1 bg-slate-400" />
+                    <span className="whitespace-nowrap">✓ Settled {fmtDate(e.occurred_on)} <span className="text-[9px]">{open ? '▾' : '▸'}</span></span>
+                    <span className="h-px flex-1 bg-slate-400" />
                   </button>
                 )}
                 {open && <Link to={`/l/${id}/e/${e.id}`} className="flex items-center gap-3 p-4 hover:bg-slate-50">
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{e.note || (gave ? `You gave ${name}` : `${name} gave you`)}</div>
                     <div className="text-xs text-slate-500">
-                      {new Date(e.occurred_on + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {fmtDate(e.occurred_on)}
                       {' · '}bal {run === 0 ? 'settled' : `${run > 0 ? '+' : '−'}${formatMoney(run, cur)}`}
                       {e.created_by && e.created_by !== me.user_id && (
                         <> · added by {ledger.data!.ledger_members.find((m) => m.user_id === e.created_by)?.display_name ?? 'them'}</>
