@@ -13,6 +13,7 @@ export default function LedgerView() {
   const ledger = useLedger(id);
   const entries = useEntries(id);
   const { me, other } = useSides(ledger.data);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set()); // settled groups, keyed by settling entry id
 
   if (ledger.isPending) return <Page title="" back="/"><Spinner /></Page>;
   if (!ledger.data || !me) return <Page title="Not found" back="/"><ErrorBox error={ledger.error ?? 'Ledger not found or you are not a member.'} /></Page>;
@@ -23,6 +24,20 @@ export default function LedgerView() {
   const name = other?.display_name ?? ledger.data.name;
 
   const running = runningBalances(list, me.id);
+
+  // Newest-first: a balance of 0 starts a settled group that runs down to the next older zero. -1 = open cycle.
+  const groupStart: number[] = [];
+  let g = -1;
+  list.forEach((e, i) => {
+    if (running.get(e.id) === 0) g = i;
+    groupStart.push(g);
+  });
+  const toggle = (eid: string) =>
+    setExpanded((s) => {
+      const n = new Set(s);
+      if (!n.delete(eid)) n.add(eid);
+      return n;
+    });
 
   return (
     <Page title={name} back="/">
@@ -46,14 +61,23 @@ export default function LedgerView() {
           {list.map((e, i) => {
             const gave = e.from_member === me.id;
             const run = running.get(e.id) ?? 0;
+            const start = groupStart[i];
+            const open = start < 0 || expanded.has(list[start].id);
+            if (!open && i !== start) return null;
             return (
               <li key={e.id}>
-                {run === 0 && i > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-1 text-[10px] font-semibold uppercase text-slate-500">
-                    <span className="h-px flex-1 bg-slate-800" />✓ Settled<span className="h-px flex-1 bg-slate-800" />
-                  </div>
+                {i === start && (
+                  <button
+                    type="button"
+                    onClick={() => toggle(e.id)}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-[10px] font-semibold uppercase text-slate-500 hover:bg-slate-50"
+                  >
+                    <span className="h-px flex-1 bg-slate-800" />
+                    ✓ Settled {new Date(e.occurred_on + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} {open ? '▾' : '▸'}
+                    <span className="h-px flex-1 bg-slate-800" />
+                  </button>
                 )}
-                <Link to={`/l/${id}/e/${e.id}`} className="flex items-center gap-3 p-4 hover:bg-slate-50">
+                {open && <Link to={`/l/${id}/e/${e.id}`} className="flex items-center gap-3 p-4 hover:bg-slate-50">
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{e.note || (gave ? `You gave ${name}` : `${name} gave you`)}</div>
                     <div className="text-xs text-slate-500">
@@ -68,7 +92,7 @@ export default function LedgerView() {
                     <div className="text-[10px] font-medium uppercase opacity-70">{gave ? 'You gave' : 'You got'}</div>
                     {formatMoney(e.amount_paise, cur)}
                   </div>
-                </Link>
+                </Link>}
               </li>
             );
           })}
